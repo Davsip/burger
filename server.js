@@ -34,7 +34,7 @@ var mysql = require("mysql");
 var connection = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "central1889",   /// enter password          <-------------------------
+  password: "",   /// enter password          <-------------------------
   database: "burgers_db"
 });
 
@@ -82,8 +82,14 @@ app.post("/burgers/create", function(req, res) {
   });
 });
 
+//////////////////////
+
+
+
 // Start our server so that it can begin listening to client requests.
 app.listen(PORT, function() {
   // Log (server-side) when our server has started
   console.log("Server listening on: http://localhost:" + PORT);
 });
+
+

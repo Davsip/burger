@@ -1,95 +1,40 @@
-// var connection = require("../config/connection.js");
+// Pull in required dependencies
+var express = require('express');
+var router = express.Router();
 
-// var orm = {
-//   selectWhere: function(tableInput, colToSearch, valOfCol) {
-//     var queryString = "SELECT * FROM ?? WHERE ?? = ?";
+// Import the model (burger.js) to use its database functions.
+var burger = require('../models/burger.js');
 
-//     connection.query(queryString, [tableInput, colToSearch, valOfCol], function(err, result) {
-//       if (err) throw err;
-//       return result;
-//     });
-//   }
-// };
+// Create the routes and associated logic
+router.get('/', function(req, res) {
+  burger.selectAll(function(data) {
+    var hbsObject = {
+      burgers: data
+    };
+    // console.log(hbsObject);
+    res.render('index', hbsObject);
+  });
+});
 
+router.post('/burgers', function(req, res) {
+  burger.insertOne([
+    'burger_name'
+  ], [
+    req.body.burger_name
+  ], function(data) {
+    res.redirect('/');
+  });
+});
 
+router.put('/burgers/:id', function(req, res) {
+  var condition = 'id = ' + req.params.id;
 
+  burger.updateOne({
+    devoured: true
+  }, condition, function(data) {
+    res.redirect('/');
+  });
+});
 
-// module.exports = orm;
-
-
-
-var connection = require("./connection.js");
-
-function printQuestionMarks(num) {
-  var arr = [];
-
-  for (var i = 0; i < num; i++) {
-    arr.push("?");
-  }
-
-  return arr.toString();
-}
-
-function objToSql(ob) {
-  // column1=value, column2=value2,...
-  var arr = [];
-
-  for (var key in ob) {
-    arr.push(key + "=" + ob[key]);
-  }
-
-  return arr.toString();
-}
-
-var orm = {
-  all: function(tableInput, cb) {
-    var queryString = "SELECT * FROM " + tableInput + ";";
-    connection.query(queryString, function(err, result) {
-      if (err) {
-        throw err;
-      }
-      cb(result);
-    });
-  },
-  // vals is an array of values that we want to save to cols
-  // cols are the columns we want to insert the values into
-  create: function(table, cols, vals, cb) {
-    var queryString = "INSERT INTO " + table;
-
-    queryString += " (";
-    queryString += cols.toString();
-    queryString += ") ";
-    queryString += "VALUES (";
-    queryString += printQuestionMarks(vals.length);
-    queryString += ") ";
-
-    console.log(queryString);
-
-    connection.query(queryString, vals, function(err, result) {
-      if (err) {
-        throw err;
-      }
-      cb(result);
-    });
-  },
-  // objColVals would be the columns and values that you want to update
-  // an example of objColVals would be {name: panther, sleepy: true}
-  update: function(table, objColVals, condition, cb) {
-    var queryString = "UPDATE " + table;
-
-    queryString += " SET ";
-    queryString += objToSql(objColVals);
-    queryString += " WHERE ";
-    queryString += condition;
-
-    console.log(queryString);
-    connection.query(queryString, function(err, result) {
-      if (err) {
-        throw err;
-      }
-      cb(result);
-    });
-  }
-};
-
-module.exports = orm;
+// Export routes for server.js to use.
+module.exports = router;
